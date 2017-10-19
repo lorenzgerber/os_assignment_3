@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <stdint.h>
 #include "timer.h"
 #define NUMBER_THREADS 20
 
@@ -22,13 +23,31 @@ typedef struct per_thread_time {
 void *Pth_empty(void* thread_data);
 int array_lengths[NUMBER_THREADS];
 char *data_arrays[NUMBER_THREADS];
+char *operation[NUMBER_THREADS];
+char *read_write[2] = {"w","r"};
+char*op;
 struct per_thread_time thread_time [NUMBER_THREADS];
 
-/*
- * generic bubble_sort
- * used as compute work task
- */
-
+char *file_names[20] = {"test0.txt",
+			"test1.txt",
+			"test2.txt",
+			"test3.txt",
+			"test4.txt",
+			"test5.txt",
+			"test6.txt",
+			"test7.txt",
+			"test8.txt",
+			"test9.txt",
+			"test10.txt",
+			"test11.txt",
+			"test12.txt",
+			"test13.txt",
+			"test14.txt",
+			"test15.txt",
+			"test16.txt",
+			"test17.txt",
+			"test18.txt",
+			"test19.txt"};
 
 
 int main(int argc, char* argv[]) {
@@ -37,9 +56,11 @@ int main(int argc, char* argv[]) {
   long       thread;
   pthread_t* thread_handles;
   double start, finish;
-  int array_size_large = 100000000;
+  int array_size_large = 10000000;
   int array_size_small = 100;
   int retVal = 0;
+
+  
 
   thread_handles = malloc(NUMBER_THREADS*sizeof(pthread_t));
 
@@ -50,23 +71,26 @@ int main(int argc, char* argv[]) {
   }
 
   for(int i = 0; i < NUMBER_THREADS; i++){
-    if (i > NUMBER_THREADS/2){
+    if (i < NUMBER_THREADS/2){
       array_lengths[i] = array_size_small;
     } else {
       array_lengths[i] = array_size_large;
     }
+
+    if (i < NUMBER_THREADS/2){
+	op = read_write[0];
+    } else {
+	op = read_write[1];
+    }
+
+    operation[i] = malloc(sizeof(char));
+    operation[i] = op;
 
     data_arrays[i] = malloc(sizeof(char)*array_lengths[i]);
     for(int j = 0; j < array_lengths[i]; j++){
       data_arrays[i][j] = 'a';
     }
   }
-
-
-
-
-  // Time stamp for total runtime
-  GET_WALL_TIME(start);
 
   // Starting Threads
   for(thread = 0; thread < NUMBER_THREADS; thread++){
@@ -87,16 +111,12 @@ int main(int argc, char* argv[]) {
     }
   }
 
-  // Time stamp for total runtime
-  GET_WALL_TIME(finish);
-
-  // data output to stdout:
-  // CPU time, Wall time, Wall time create until run, wall time run until finish
-
+    
   for(int i = 0; i < NUMBER_THREADS; i++){
-    printf("%d %d %e %e\n",
+    printf("%d %d %s %e %e\n",
         array_lengths[i],
         i,
+	operation[i],
         thread_time[i].wall_t_finish - thread_time[i].wall_t_run,
         thread_time[i].wall_t_finish - thread_time[i].wall_t_create);
 	}
@@ -120,154 +140,18 @@ void *Pth_empty(void* rank){
   int my_rank = *(int*) rank;
 
   GET_WALL_TIME(thread_time[my_rank].wall_t_run);
-
-  char* write = "w";
-  char* read = "r";
-  char* append = "a";
-
-
+ 
   FILE *fp;
 
-  if(my_rank == 0){
-    fp = fopen("test0.txt", "w");
+  fp = fopen(file_names[my_rank], op);
+  if(*op==77){
     fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
+  } else {
+    fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
   }
-
-  if(my_rank == 1){
-    fp = fopen("test1.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 2){
-    fp = fopen("test2.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 3){
-    fp = fopen("test3.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 4){
-    fp = fopen("test4.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 5){
-    fp = fopen("test5.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 6){
-    fp = fopen("test6.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 7){
-    fp = fopen("test7.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 8){
-    fp = fopen("test8.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 9){
-    fp = fopen("test9.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 10){
-    fp = fopen("test10.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 11){
-    fp = fopen("test11.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 12){
-    fp = fopen("test12.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 13){
-    fp = fopen("test13.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 14){
-    fp = fopen("test14.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 15){
-    fp = fopen("test15.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 16){
-    fp = fopen("test16.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    //fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
-    fclose(fp);
-  }
-
-  if(my_rank == 17){
-    fp = fopen("test17.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    fclose(fp);
-  }
-
-  if(my_rank == 18){
-    fp = fopen("test18.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    fclose(fp);
-  }
-
-  if(my_rank == 19){
-    fp = fopen("test19.txt", "w");
-    fputs(data_arrays[my_rank], fp);
-    fclose(fp);
-  }
-
-
+  fclose(fp);
+  
   GET_WALL_TIME(thread_time[my_rank].wall_t_finish);
-
 
   return NULL;
 }
