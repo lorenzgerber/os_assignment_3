@@ -24,7 +24,7 @@ void *Pth_empty(void* thread_data);
 int array_lengths[NUMBER_THREADS];
 char *data_arrays[NUMBER_THREADS];
 char *operation[NUMBER_THREADS];
-char *read_write[2] = {"w","r"};
+char *read_write[2] = {"r","w"};
 char*op;
 struct per_thread_time thread_time [NUMBER_THREADS];
 
@@ -77,6 +77,7 @@ int main(int argc, char* argv[]) {
       array_lengths[i] = array_size_large;
     }
 
+    // 
     if (i < NUMBER_THREADS/2){
 	op = read_write[0];
     } else {
@@ -111,7 +112,7 @@ int main(int argc, char* argv[]) {
     }
   }
 
-    
+  // Reporting Results  
   for(int i = 0; i < NUMBER_THREADS; i++){
     printf("%d %d %s %e %e\n",
         array_lengths[i],
@@ -133,7 +134,8 @@ int main(int argc, char* argv[]) {
 /**
  *
  * Thread function
- * Calling bubblesort and doing
+ * Doing read or write, small or large
+ * depending on thread rank
  * Benchmarking
  */
 void *Pth_empty(void* rank){
@@ -144,10 +146,10 @@ void *Pth_empty(void* rank){
   FILE *fp;
 
   fp = fopen(file_names[my_rank], op);
-  if(*op==77){
-    fputs(data_arrays[my_rank], fp);
-  } else {
+  if(*op==114){     // 114, ASCII 'r'
     fgets(data_arrays[my_rank], array_lengths[my_rank], fp );
+  } else {
+    fputs(data_arrays[my_rank], fp);
   }
   fclose(fp);
   
